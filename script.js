@@ -1,4 +1,4 @@
-// Matrix Background Logic
+// Matrix Background Logic - Optimized for Brutalist Theme (Grayscale)
 const canvas = document.getElementById('matrix-bg');
 const ctx = canvas.getContext('2d');
 
@@ -20,11 +20,11 @@ window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
 function drawMatrix() {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+    ctx.fillStyle = 'rgba(8, 8, 8, 0.1)';
     ctx.fillRect(0, 0, width, height);
 
-    ctx.fillStyle = '#0F0';
-    ctx.font = fontSize + 'px monospace';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.font = fontSize + 'px "JetBrains Mono"';
 
     for (let i = 0; i < drops.length; i++) {
         const text = chars[Math.floor(Math.random() * chars.length)];
@@ -39,7 +39,8 @@ function drawMatrix() {
 
 setInterval(drawMatrix, 50);
 
-// Dashboard Logic
+// Dashboard Logic with Backend Integration
+const API_URL = 'http://localhost:3001/api';
 const dashboardGrid = document.getElementById('dashboard-grid');
 const terminalModal = document.getElementById('terminal-modal');
 const openTerminalBtn = document.getElementById('open-terminal');
@@ -49,90 +50,99 @@ const linkNameInput = document.getElementById('link-name');
 const linkUrlInput = document.getElementById('link-url');
 const terminalDate = document.getElementById('terminal-date');
 
-let shortcuts = JSON.parse(localStorage.getItem('hacker_shortcuts')) || [
-    { name: 'GOOGLE_SECURE', url: 'https://google.com' },
-    { name: 'GITHUB_REPOS', url: 'https://github.com' },
-    { name: 'LOCAL_PORT_8080', url: 'http://localhost:8080' }
-];
+let shortcuts = [];
 
 function updateTerminalDate() {
     const now = new Date();
-    const options = { 
-        timeZone: 'Europe/Lisbon', 
-        year: 'numeric', 
-        month: '2-digit', 
-        day: '2-digit', 
-        hour: '2-digit', 
-        minute: '2-digit', 
-        second: '2-digit',
-        hour12: false 
-    };
-    const formatter = new Intl.DateTimeFormat('pt-PT', options);
-    const parts = formatter.formatToParts(now);
-    const dateStr = `${parts.find(p => p.type === 'year').value}-${parts.find(p => p.type === 'month').value}-${parts.find(p => p.type === 'day').value}`;
-    const timeStr = `${parts.find(p => p.type === 'hour').value}:${parts.find(p => p.type === 'minute').value}:${parts.find(p => p.type === 'second').value}`;
-    
-    terminalDate.textContent = `TIMESTAMP: ${dateStr} ${timeStr}`;
+    const dateStr = now.toISOString().split('T')[0];
+    const timeStr = now.toTimeString().split(' ')[0];
+    terminalDate.textContent = `[ TIMESTAMP: ${dateStr} // ${timeStr} ]`;
 }
 
 setInterval(updateTerminalDate, 1000);
 updateTerminalDate();
 
-function renderShortcuts() {
-    dashboardGrid.innerHTML = '';
-    shortcuts.forEach((shortcut, index) => {
-        const card = document.createElement('div');
-        card.className = 'shortcut-card';
-        
-        // Ensure URL has protocol
-        let url = shortcut.url;
-        if (!url.startsWith('http')) {
-            url = 'https://' + url;
-        }
-
-        card.innerHTML = `
-            <button class="delete-btn" data-index="${index}">[UNLINK]</button>
-            <div class="card-content" onclick="window.open('${url}', '_blank')">
-                <div class="card-title">${shortcut.name}</div>
-                <div class="card-url">${shortcut.url}</div>
+// Fetch Shortcuts from MySQL
+async function fetchShortcuts() {
+    try {
+        const response = await fetch(`${API_URL}/shortcuts`);
+        shortcuts = await response.json();
+        renderShortcuts();
+    } catch (err) {
+        console.error('FETCH_ERROR:', err);
+        dashboardGrid.innerHTML = `
+            <div style="grid-column: 1/-1; padding: 2rem; border: 2px solid var(--alert); color: var(--alert); background: rgba(255,0,60,0.1); font-weight: 900; text-align: center;">
+                [ ERROR::DATABASE_OFFLINE ]<br>
+                CHECK SERVER LOGS AND SQL CREDENTIALS
             </div>
         `;
+    }
+}
+
+function renderShortcuts() {
+    dashboardGrid.innerHTML = '';
+    shortcuts.forEach((shortcut) => {
+        const card = document.createElement('a');
+        card.className = 'shortcut-card';
+        
+        let url = shortcut.link;
+        if (!url.startsWith('http') && !url.startsWith('//')) {
+            url = 'https://' + url;
+        }
+        
+        card.href = url;
+        card.target = '_blank';
+
+        card.innerHTML = `
+            <div class="card-content">
+                <div class="card-title">${shortcut.nome.toUpperCase()}</div>
+                <div class="card-url">${shortcut.link.toLowerCase()}</div>
+            </div>
+            <button class="delete-btn" data-id="${shortcut.id}" title="UNLINK NODE">[ REMOVE_NODE ]</button>
+        `;
+
+        const deleteBtn = card.querySelector('.delete-btn');
+        deleteBtn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            deleteShortcut(shortcut.id);
+        };
+
         dashboardGrid.appendChild(card);
     });
-
-    // Add event listeners to delete buttons
-    document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.onclick = (e) => {
-            e.stopPropagation();
-            const index = e.target.getAttribute('data-index');
-            deleteShortcut(index);
-        };
-    });
 }
 
-function saveToStorage() {
-    localStorage.setItem('hacker_shortcuts', JSON.stringify(shortcuts));
+async function deleteShortcut(id) {
+    try {
+        await fetch(`${API_URL}/shortcuts/${id}`, { method: 'DELETE' });
+        fetchShortcuts();
+    } catch (err) {
+        console.error('DELETE_ERROR:', err);
+    }
 }
 
-function deleteShortcut(index) {
-    shortcuts.splice(index, 1);
-    saveToStorage();
-    renderShortcuts();
-}
-
-function addShortcut() {
+async function addShortcut() {
     const name = linkNameInput.value.trim();
     const url = linkUrlInput.value.trim();
 
     if (name && url) {
-        shortcuts.push({ name: name.toUpperCase(), url: url });
-        saveToStorage();
-        renderShortcuts();
-        closeModal();
-        linkNameInput.value = '';
-        linkUrlInput.value = '';
+        try {
+            await fetch(`${API_URL}/shortcuts`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nome: name.toUpperCase(), link: url })
+            });
+            fetchShortcuts();
+            closeModal();
+            linkNameInput.value = '';
+            linkUrlInput.value = '';
+        } catch (err) {
+            console.error('SAVE_ERROR:', err);
+            alert('CRITICAL_ERROR: FAILED_TO_SAVE_TO_DATABASE');
+        }
     } else {
-        alert('ERROR: INPUT_REQUIRED');
+        linkNameInput.style.borderColor = 'var(--alert)';
+        setTimeout(() => linkNameInput.style.borderColor = '', 2000);
     }
 }
 
@@ -156,5 +166,5 @@ window.onclick = (event) => {
 };
 
 // Initial Render
-renderShortcuts();
-console.log('SYSTEM INITIALIZED...');
+fetchShortcuts();
+console.log('SYSTEM_BOOT_COMPLETE::DATABASE_READY');

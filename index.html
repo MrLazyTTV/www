@@ -3,30 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hacker Dashboard | System Access</title>
+    <title>TERMINAL_DASHBOARD | SYSTEM_ACCESS</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <meta name="description" content="High-performance brutalist dashboard for system shortcuts and link management.">
 </head>
 <body>
     <canvas id="matrix-bg"></canvas>
     <div class="scanlines"></div>
 
+    <!-- Huashu-Design Watermark -->
+    <div style="position: fixed; bottom: 24px; right: 32px; font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 0.2em; font-family: 'JetBrains Mono', monospace; pointer-events: none; z-index: 1001; text-transform: uppercase;">
+        Design by Huashu-Design
+    </div>
+
     <div class="container">
         <header>
             <div class="glitch-wrapper">
-                <h1 class="glitch" data-text="SYSTEM_DASHBOARD">SYSTEM_DASHBOARD</h1>
+                <h1 class="glitch" data-text="SYSTEM_HUB">SYSTEM_HUB</h1>
             </div>
             <div class="system-info">
-                <span id="terminal-date"></span>
-                <span id="terminal-status">STATUS: SECURE</span>
+                <div id="terminal-date">--- LOADING_TIMESTAMP ---</div>
+                <div id="terminal-status">CONNECTED // SECURE_ENCRYPTION_ACTIVE</div>
             </div>
         </header>
 
         <main>
             <div class="action-bar">
                 <button id="open-terminal" class="btn-hacker">
-                    <span class="btn-text">> INITIALIZE_NEW_LINK</span>
-                    <span class="btn-glitch"></span>
+                    [+] INITIALIZE_NEW_DEPLOYMENT
                 </button>
             </div>
 
@@ -39,20 +46,20 @@
         <div id="terminal-modal" class="modal">
             <div class="modal-content hacker-panel">
                 <div class="panel-header">
-                    <span class="panel-title">SYSTEM_INPUT_INTERFACE</span>
-                    <button id="close-terminal" class="close-btn">&times;</button>
+                    <span class="panel-title">INTERFACE::NODE_CREATION</span>
+                    <button id="close-terminal" class="close-btn" aria-label="Close Interface">&times;</button>
                 </div>
                 <div class="panel-body">
                     <div class="input-group">
-                        <label for="link-name">NAME_ID:</label>
-                        <input type="text" id="link-name" placeholder="e.g. DATABASE_ALPHA" autocomplete="off">
+                        <label for="link-name">IDENTIFIER:</label>
+                        <input type="text" id="link-name" placeholder="E.G. CORE_SERVER_ALPHA" autocomplete="off">
                     </div>
                     <div class="input-group">
-                        <label for="link-url">TARGET_URL:</label>
-                        <input type="text" id="link-url" placeholder="https://..." autocomplete="off">
+                        <label for="link-url">TARGET_ADDR:</label>
+                        <input type="text" id="link-url" placeholder="HTTPS://..." autocomplete="off">
                     </div>
                     <button id="save-link" class="btn-hacker full-width">
-                        <span class="btn-text">EXECUTE_DEPLOYMENT</span>
+                        EXECUTE_DEPLOYMENT_SEQUENCE
                     </button>
                 </div>
             </div>
@@ -61,7 +68,9 @@
 
     <footer>
         <div class="footer-text">
-            [MrLazy_OS v1.0.4] | ENCRYPTED_CONNECTION: ACTIVE
+            <span>[MRLAZY_OS_CORE_V1.0.4]</span>
+            <span>ENCRYPTED_HANDSHAKE: OK</span>
+            <span>UPTIME: 99.998%</span>
         </div>
     </footer>
 
